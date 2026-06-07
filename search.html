@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>搜索结果 - EcoMall</title>
+    <style>
+        /* --- 全局重置与基础样式 --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: #f9f9f9; 
+            color: #333; 
+            padding: 20px;
+        }
+        
+        /* --- 页眉布局 --- */
+        .header {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .logo { 
+            font-size: 24px; 
+            font-weight: bold; 
+            color: #2e7d32; 
+            text-decoration: none; 
+            margin-right: 20px;
+        }
+        
+        /* --- 独立搜索栏样式 --- */
+        .search-container {
+            display: flex;
+            max-width: 500px;
+            width: 100%;
+            gap: 10px;
+        }
+        .search-container input { 
+            flex-grow: 1;
+            padding: 10px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            font-size: 16px;
+        }
+        .search-container button { 
+            padding: 10px 2im; 
+            background: #2e7d32; 
+            color: white; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-size: 16px;
+        }
+        .search-container button:hover { background: #1b5e20; }
+
+        /* --- 搜索结果列表 --- */
+        .search-results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            padding: 20px 0;
+        }
+        .result-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .result-item img { 
+            width: 100%; 
+            height: 150px; 
+            object-fit: cover; 
+            border-radius: 4px; 
+        }
+        .result-item h3 { 
+            margin: 10px 0; 
+            font-size: 16px; 
+        }
+        .result-item p { 
+            color: #e53935; 
+            font-weight: bold; 
+            margin-bottom: 10px; 
+        }
+        .no-results {
+            text-align: center;
+            color: #999;
+            font-size: 18px;
+            margin-top: 40px;
+            grid-column: 1 / -1;
+        }
+
+        /* --- 返回首页链接 --- */
+        .back-link {
+            display: block;
+            text-align: center;
+            margin: 30px 0;
+            color: #2e7d32;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+    <!-- 页眉 -->
+    <header class="header">
+        <a href="index.html" class="logo">EcoMall</a>
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="搜索有机食品..." value="">
+            <button onclick="searchProducts()">搜索</button>
+        </div>
+    </header>
+
+    <!-- 搜索结果容器 -->
+    <div class="search-results" id="searchResults">
+        <!-- 结果将通过 JavaScript 动态插入 -->
+    </div>
+
+    <!-- 返回首页链接 -->
+    <a href="index.html" class="back-link">&larr; 返回首页</a>
+
+    <script>
+        // ==================== 核心数据获取 ====================
+        // 修改点：优先从 localStorage 读取，与 index.html 保持数据同步
+        function getProducts() {
+            const stored = localStorage.getItem('products');
+            if (stored) {
+                return JSON.parse(stored);
+            }
+            // 备用数据 (仅在 localStorage 为空时使用)
+            return [
+                { id: 1, name: "有机苹果", category: "fruits", price: 12.00, image: "apple.png" },
+                { id: 2, name: "新鲜菠菜", category: "vegetables", price: 5.00, image: "vegetable.png" },
+                { id: 3, name: "五常大米", category: "grains", price: 68.00, image: "rice.png" },
+                { id: 4, name: "香蕉", category: "fruits", price: 8.00, image: "https://via.placeholder.com/150?text=Banana" },
+                { id: 5, name: "胡萝卜", category: "vegetables", price: 6.50, image: "https://via.placeholder.com/150?text=Carrot" }
+            ];
+        }
+
+        // ==================== URL 参数处理 ====================
+        function getUrlParam(name) {
+            const match = RegExp('[?&]' + name + '=([^&]*)').exec(location.search);
+            return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+        }
+
+        // ==================== 搜索与渲染逻辑 ====================
+        function searchAndRender() {
+            const query = getUrlParam('q');
+            if (!query) return;
+
+            // 1. 获取最新商品数据
+            const allProducts = getProducts();
+            
+            // 2. 执行搜索 (简单模糊匹配)
+            // 注意：这里处理了之前代码中可能存在的 "filter:" 前缀，保证兼容性
+            const cleanQuery = query.replace(/^filter:/, '').toLowerCase();
+            const results = allProducts.filter(p => p.name.toLowerCase().includes(cleanQuery));
+
+            // 3. 渲染结果
+            const container = document.getElementById('searchResults');
+            container.innerHTML = '';
+
+            if (results.length === 0) {
+                container.innerHTML = '<div class="no-results"><p>未找到相关商品</p><p>请尝试更换关键词</p></div>';
+                return;
+            }
+
+            results.forEach(p => {
+                const imagePath = p.image || 'https://via.placeholder.com/150?text=No+Image';
+                const card = document.createElement('div');
+                card.className = 'result-item';
+                card.innerHTML = `
+                    <img src="${imagePath}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/150?text=Image+Error'">
+                    <h3>${p.name}</h3>
+                    <p>¥${p.price.toFixed(2)}</p>
+                    <button class="add-cart-btn" onclick="addToCart(${p.id}, '${p.name}', ${p.price})">加入购物车</button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // ==================== 加入购物车 ====================
+        function addToCart(id, name, price) {
+            let cart = JSON.parse(localStorage.getItem('ecommall_cart') || '[]');
+            const existing = cart.find(item => item.id === id);
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                cart.push({ id, name, price, qty: 1, checked: true });
+            }
+            localStorage.setItem('ecommall_cart', JSON.stringify(cart));
+            
+            // 简单的提示
+            alert(`已加入购物车: ${name}`);
+        }
+
+        // ==================== 页面初始化 ====================
+        window.onload = function() {
+            // 1. 执行搜索渲染
+            searchAndRender();
+            
+            // 2. 填充搜索框
+            const query = getUrlParam('q');
+            if (query) {
+                document.getElementById('search-input').value = query.replace(/^filter:/, '');
+            }
+        };
+
+        // 回车搜索
+        document.getElementById('search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const val = this.value.trim();
+                if (val) window.location.href = `search.html?q=${encodeURIComponent(val)}`;
+            }
+        });
+    </script>
+</body>
+</html>
