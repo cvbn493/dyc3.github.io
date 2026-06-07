@@ -1,0 +1,40 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "title": "山东红富士苹果",
+      "price": 12.5,
+      "category": "fruits",
+      "description": "山东烟台有机种植，24小时冷链直达，无农药残留检测报告",
+      "image": "apple.png",
+      "carbonFootprint": "0.8kg CO2"
+    },
+    {
+      "id": 2,
+      "title": "有机菠菜礼盒",
+      "price": 18.0,
+      "category": "vegetables",
+      "description": "当日采摘，无土栽培，富含铁元素，500g新鲜装",
+      "image": "spinach.png",
+      "carbonFootprint": "0.3kg CO2"
+    },
+    {
+      "id": 3,
+      "title": "东北五常大米",
+      "price": 32.9,
+      "category": "grains",
+      "description": "当季新米，真空包装，10斤家庭装，非转基因认证",
+      "image": "rice.png",
+      "carbonFootprint": "2.1kg CO2"
+    },
+    {
+      "id": 4,
+      "title": "冷榨橄榄油",
+      "price": 59.9,
+      "category": "beverages",
+      "description": "西班牙原装进口，特级初榨，500ml玻璃瓶装",
+      "image": "olive-oil.png",
+      "carbonFootprint": "1.5kg CO2"
+    }
+  ]
+}
