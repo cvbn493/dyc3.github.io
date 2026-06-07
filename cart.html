@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>购物车 - EcoMall</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; 
+            background-color: #f5f7fa; color: #333; line-height: 1.6;
+        }
+        
+        .header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 15px 5%; background: #fff; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06); 
+            position: sticky; top: 0; z-index: 100;
+        }
+        .logo { font-size: 26px; font-weight: bold; color: #2e7d32; text-decoration: none; }
+        nav { display: flex; align-items: center; gap: 8px; }
+        nav a { 
+            text-decoration: none; color: #666; padding: 8px 16px; 
+            border-radius: 6px; font-weight: 500; transition: all 0.3s;
+        }
+        nav a:hover { color: #2e7d32; background: #f1f8e9; }
+        nav a.active { color: #2e7d32; background: #e8f5e9; }
+        
+        .cart-badge { 
+            display: inline-flex; align-items: center; justify-content: center;
+            background: #e53935; color: white; font-size: 11px; font-weight: bold;
+            min-width: 18px; height: 18px; border-radius: 9px; margin-left: 4px;
+            padding: 0 5px;
+        }
+        
+        .cart-container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+        .cart-box { 
+            background: #fff; border-radius: 12px; 
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow: hidden;
+        }
+        
+        .cart-header { 
+            display: flex; padding: 16px 24px; background: #f8f9fa; 
+            color: #666; font-weight: 500; font-size: 14px; align-items: center;
+            border-bottom: 1px solid #eee;
+        }
+        .col-check { width: 60px; text-align: center; }
+        .col-check input { width: 18px; height: 18px; cursor: pointer; accent-color: #2e7d32; }
+        .col-product { flex: 1; padding-left: 15px; }
+        .col-price { width: 100px; text-align: center; }
+        .col-qty { width: 140px; text-align: center; }
+        .col-total { width: 100px; text-align: center; }
+        .col-action { width: 80px; text-align: center; }
+        
+        .cart-item { 
+            display: flex; align-items: center; padding: 20px 24px; 
+            border-bottom: 1px solid #f0f0f0; transition: background 0.2s;
+        }
+        .cart-item:hover { background: #fafafa; }
+        .cart-item.selected { background: #f1f8e9; }
+        
+        .product-info { 
+            display: flex; align-items: center; gap: 15px; flex: 1; padding-left: 15px;
+        }
+        .product-info img { 
+            width: 70px; height: 70px; object-fit: cover; border-radius: 8px; 
+            border: 1px solid #eee; background: #f5f5f5;
+        }
+        .product-info a { 
+            color: #333; text-decoration: none; font-weight: 500; 
+            transition: color 0.3s; font-size: 15px;
+        }
+        .product-info a:hover { color: #2e7d32; }
+        .product-info .spec { font-size: 12px; color: #999; margin-top: 4px; }
+        
+        .qty-control { display: flex; justify-content: center; align-items: center; }
+        .qty-btn { 
+            width: 32px; height: 32px; border: 1px solid #ddd; background: #fff;
+            cursor: pointer; font-size: 16px; transition: all 0.2s; color: #666;
+        }
+        .qty-btn:hover { background: #e8f5e9; border-color: #2e7d32; color: #2e7d32; }
+        .qty-btn:first-child { border-radius: 4px 0 0 4px; }
+        .qty-btn:last-child { border-radius: 0 4px 4px 0; }
+        .qty-input { 
+            width: 44px; height: 32px; border-top: 1px solid #ddd; 
+            border-bottom: 1px solid #ddd; border-left: none; border-right: none;
+            text-align: center; font-size: 14px; color: #333;
+        }
+        
+        .delete-btn { 
+            color: #e53935; background: none; border: none; cursor: pointer; 
+            font-size: 13px; padding: 6px 10px; border-radius: 4px; transition: all 0.2s;
+        }
+        .delete-btn:hover { background: #ffebee; }
+        
+        .cart-footer { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 20px 24px; background: #fff; border-top: 1px solid #eee;
+        }
+        .footer-left { display: flex; align-items: center; gap: 12px; }
+        .continue-btn { 
+            background: #fff; color: #2e7d32; border: 1px solid #2e7d32; 
+            padding: 10px 20px; border-radius: 6px; font-size: 14px; 
+            cursor: pointer; text-decoration: none; display: inline-block; transition: all 0.3s;
+        }
+        .continue-btn:hover { background: #f1f8e9; }
+        .batch-delete-btn {
+            color: #e53935; background: none; border: 1px solid #e53935; 
+            padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px;
+            transition: all 0.3s;
+        }
+        .batch-delete-btn:hover { background: #ffebee; }
+        .clear-btn {
+            color: #999; background: none; border: 1px solid #ddd; 
+            padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 14px;
+            transition: all 0.3s;
+        }
+        .clear-btn:hover { background: #f5f5f5; color: #666; }
+        
+        .total-section { font-size: 15px; color: #666; }
+        .total-section .total-price { 
+            color: #e53935; font-size: 24px; font-weight: bold; margin-left: 4px;
+        }
+        .checkout-btn { 
+            background: #2e7d32; color: white; border: none; 
+            padding: 12px 36px; border-radius: 6px; font-size: 16px; 
+            cursor: pointer; transition: all 0.3s; margin-left: 20px;
+        }
+        .checkout-btn:hover:not(:disabled) { background: #1b5e20; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(46,125,50,0.3); }
+        .checkout-btn:disabled { background: #ccc; cursor: not-allowed; }
+        
+        .empty-cart { text-align: center; padding: 60px 20px; }
+        .empty-cart .icon { font-size: 64px; margin-bottom: 15px; }
+        .empty-cart h3 { color: #666; margin-bottom: 10px; }
+        .empty-cart a { 
+            color: #2e7d32; text-decoration: none; font-weight: 500;
+            display: inline-block; margin-top: 10px; padding: 10px 24px;
+            border: 1px solid #2e7d32; border-radius: 6px; transition: all 0.3s;
+        }
+        .empty-cart a:hover { background: #f1f8e9; }
+        
+        .footer { 
+            text-align: center; padding: 25px; background: #2c3e50; 
+            color: #95a5a6; font-size: 13px; margin-top: 40px;
+        }
+        
+        .toast { 
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(20px);
+            background: #2e7d32; color: white; padding: 12px 24px; border-radius: 8px;
+            z-index: 1000; opacity: 0; transition: all 0.3s ease; pointer-events: none;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.error { background: #e53935; }
+        
+        @media (max-width: 768px) {
+            .cart-header { display: none; }
+            .cart-item { flex-wrap: wrap; padding: 15px; }
+            .col-check { width: 40px; }
+            .product-info { padding-left: 0; width: 100%; margin-bottom: 10px; }
+            .col-price, .col-total { width: auto; flex: 1; }
+            .cart-footer { flex-wrap: wrap; gap: 15px; }
+            .checkout-btn { margin-left: 0; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <a href="index.html" class="logo">🌿 EcoMall</a>
+        
+<nav>
+            <a href="index.html" class="active">首页</a>
+            <a href="cart.html" id="cart-link">购物车<span class="cart-badge" id="cart-badge">0</span></a>
+            <a href="profile.html">个人中心</a>
+            <a href="admin.html">管理后台</a>
+        </nav>
+    </header>
+    <div class="cart-container">
+        <div class="cart-box">
+            <div class="cart-header">
+                <div class="col-check">
+                    <input type="checkbox" id="select-all" checked>
+                </div>
+                <div class="col-product">商品信息</div>
+                <div class="col-price">单价</div>
+                <div class="col-qty">数量</div>
+                <div class="col-total">小计</div>
+                <div class="col-action">操作</div>
+            </div>
+            
+            <div id="cart-items"></div>
+            
+            <div class="cart-footer" id="cart-footer">
+                <div class="footer-left">
+                    <a href="index.html" class="continue-btn">← 继续购物</a>
+                    <button class="batch-delete-btn" id="batch-delete-btn" onclick="deleteSelected()" style="display:none;">删除选中</button>
+                    <button class="clear-btn" onclick="clearAllData()">清空数据</button>
+                </div>
+                <div style="display:flex;align-items:center;">
+                    <div class="total-section">
+                        已选 <span id="selected-count" style="color:#e53935;font-weight:bold;">0</span> 件，
+                        合计：<span class="total-price">¥<span id="total-amount">0.00</span></span>
+                    </div>
+                    <button class="checkout-btn" id="checkout-btn" onclick="checkout()">去结算</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>© 24215220219-侯睿</p>
+    </footer>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        const CART_KEY = 'ecommall_cart';
+        const BROADCAST_CHANNEL = 'ecommall_channel';
+        const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(BROADCAST_CHANNEL) : null;
+        
+        function getCart() {
+            try {
+                const data = JSON.parse(localStorage.getItem(CART_KEY));
+                if (!data || !Array.isArray(data)) return [];
+                return data.map(item => ({
+                    id: item.id || 0,
+                    name: item.name || '未知商品',
+                    price: parseFloat(item.price) || 0,
+                    image: item.image || 'https://via.placeholder.com/70?text=无图',
+                    qty: parseInt(item.qty || item.quantity) || 1,
+                    checked: item.checked !== false,
+                    category: item.category || ''
+                })).filter(item => item.id > 0);
+            } catch(e) {
+                console.error('读取购物车失败:', e);
+                return [];
+            }
+        }
+        
+        function saveCart(cart) {
+            localStorage.setItem(CART_KEY, JSON.stringify(cart));
+            if (channel) channel.postMessage({ type: 'cart_updated', timestamp: Date.now() });
+            window.dispatchEvent(new CustomEvent('ecommall_cart_change'));
+        }
+        
+        function showToast(message, isError) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast' + (isError ? ' error' : '');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+        
+        function renderCart() {
+            console.log('renderCart called');
+            const cart = getCart();
+            console.log('cart data:', cart);
+            
+            const container = document.getElementById('cart-items');
+            const footer = document.getElementById('cart-footer');
+            
+            if (!container || !footer) {
+                console.error('容器元素不存在');
+                return;
+            }
+            
+            // 更新导航角标
+            const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+            const navBadge = document.getElementById('nav-badge');
+            if (navBadge) {
+                navBadge.textContent = totalQty;
+                navBadge.style.display = totalQty > 0 ? 'inline-flex' : 'none';
+            }
+            
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-cart">
+                        <div class="icon">🛒</div>
+                        <h3>购物车空空如也~</h3>
+                        <p style="color:#999;margin-bottom:15px;">快去挑选心仪的商品吧！</p>
+                        <a href="index.html">去首页逛逛 →</a>
+                    </div>
+                `;
+                footer.style.display = 'none';
+                return;
+            }
+            
+            footer.style.display = 'flex';
+            
+            container.innerHTML = cart.map((item, index) => `
+                <div class="cart-item ${item.checked ? 'selected' : ''}" data-index="${index}">
+                    <div class="col-check">
+                        <input type="checkbox" class="item-checkbox" ${item.checked ? 'checked' : ''} data-index="${index}">
+                    </div>
+                    <div class="product-info">
+                        <img src="${item.image}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/70?text=无图'">
+                        <div>
+                            <a href="product.html?id=${item.id}">${item.name}</a>
+                            <div class="spec">${getCategoryText(item.category)}</div>
+                        </div>
+                    </div>
+                    <div class="col-price">¥${item.price.toFixed(2)}</div>
+                    <div class="col-qty">
+                        <div class="qty-control">
+                            <button class="qty-btn" onclick="changeQty(${index}, -1)">−</button>
+                            <input type="text" class="qty-input" value="${item.qty}" readonly>
+                            <button class="qty-btn" onclick="changeQty(${index}, 1)">+</button>
+                        </div>
+                    </div>
+                    <div class="col-total" style="color:#e53935;font-weight:bold;">¥${(item.price * item.qty).toFixed(2)}</div>
+                    <div class="col-action">
+                        <button class="delete-btn" onclick="deleteItem(${index})">删除</button>
+                    </div>
+                </div>
+            `).join('');
+            
+            bindCheckboxEvents();
+            updateSummary();
+        }
+        
+        function getCategoryText(cat) {
+            return { fruits: '水果', vegetables: '蔬菜', grains: '五谷杂粮' }[cat] || '有机食品';
+        }
+        
+        function bindCheckboxEvents() {
+            const selectAll = document.getElementById('select-all');
+            if (!selectAll) return;
+            
+            selectAll.addEventListener('change', function() {
+                const cart = getCart();
+                cart.forEach(item => item.checked = this.checked);
+                saveCart(cart);
+                renderCart();
+            });
+            
+            document.querySelectorAll('.item-checkbox').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const index = parseInt(this.dataset.index);
+                    const cart = getCart();
+                    if (cart[index]) {
+                        cart[index].checked = this.checked;
+                        saveCart(cart);
+                        updateSelectAllState();
+                        this.closest('.cart-item').classList.toggle('selected', this.checked);
+                        updateSummary();
+                    }
+                });
+            });
+        }
+        
+        function updateSelectAllState() {
+            const cart = getCart();
+            const selectAll = document.getElementById('select-all');
+            if (selectAll) {
+                selectAll.checked = cart.length > 0 && cart.every(item => item.checked);
+            }
+        }
+        
+        function updateSummary() {
+            const cart = getCart();
+            let total = 0, selectedCount = 0;
+            
+            cart.forEach(item => {
+                if (item.checked) {
+                    total += item.price * item.qty;
+                    selectedCount += item.qty;
+                }
+            });
+            
+            const totalAmount = document.getElementById('total-amount');
+            const selectedCountEl = document.getElementById('selected-count');
+            const checkoutBtn = document.getElementById('checkout-btn');
+            const batchDeleteBtn = document.getElementById('batch-delete-btn');
+            
+            if (totalAmount) totalAmount.textContent = total.toFixed(2);
+            if (selectedCountEl) selectedCountEl.textContent = selectedCount;
+            if (checkoutBtn) checkoutBtn.disabled = total === 0;
+            if (batchDeleteBtn) {
+                batchDeleteBtn.style.display = cart.some(item => item.checked) ? 'inline-block' : 'none';
+            }
+            
+            updateSelectAllState();
+        }
+        
+        window.changeQty = function(index, delta) {
+            const cart = getCart();
+            if (!cart[index]) return;
+            const newQty = cart[index].qty + delta;
+            if (newQty > 0) {
+                cart[index].qty = newQty;
+                saveCart(cart);
+                renderCart();
+            }
+        };
+        
+        window.deleteItem = function(index) {
+            if (!confirm('确定要移除该商品吗？')) return;
+            const cart = getCart();
+            cart.splice(index, 1);
+            saveCart(cart);
+            renderCart();
+            showToast('已删除商品');
+        };
+        
+        window.deleteSelected = function() {
+            const cart = getCart();
+            const selectedCount = cart.filter(item => item.checked).length;
+            if (selectedCount === 0) {
+                showToast('请先选择要删除的商品', true);
+                return;
+            }
+            if (!confirm(`确定删除选中的 ${selectedCount} 件商品？`)) return;
+            
+            const remaining = cart.filter(item => !item.checked);
+            saveCart(remaining);
+            renderCart();
+            showToast(`已删除 ${selectedCount} 件商品`);
+        };
+        
+        window.clearAllData = function() {
+            if (!confirm('确定要清空购物车所有数据吗？\n（用于修复数据异常）')) return;
+            localStorage.removeItem(CART_KEY);
+            renderCart();
+            showToast('购物车已清空');
+        };
+        
+        window.checkout = function() {
+            const cart = getCart();
+            const selected = cart.filter(item => item.checked);
+            
+            if (selected.length === 0) {
+                showToast('请先选择要结算的商品', true);
+                return;
+            }
+            
+            const total = selected.reduce((sum, item) => sum + item.price * item.qty, 0);
+            const userInfo = JSON.parse(localStorage.getItem('user_profile')) || { nickname: '用户' };
+            
+            alert(`🎉 亲爱的 ${userInfo.nickname}，订单提交成功！\n\n应付总额：¥${total.toFixed(2)}\n（演示功能，未连接真实支付）`);
+            
+            const remaining = cart.filter(item => !item.checked);
+            saveCart(remaining);
+            renderCart();
+            showToast('订单提交成功！');
+        };
+        
+        if (channel) {
+            channel.onmessage = (event) => {
+                if (event.data?.type === 'cart_updated') renderCart();
+            };
+        }
+        
+        window.addEventListener('storage', (e) => {
+            if (e.key === CART_KEY) renderCart();
+        });
+        
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') renderCart();
+        });
+        
+        window.addEventListener('ecommall_cart_change', () => renderCart());
+        
+        // 确保DOM加载完成后渲染
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', renderCart);
+        } else {
+            renderCart();
+        }
+    </script>
+</body>
+</html>
