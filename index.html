@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoMall - 绿色生活电商平台</title>
+    <style>
+        /* --- 全局重置与基础样式 --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: #f9f9f9; 
+            color: #333; 
+        }
+        
+        /* --- 顶部时间地点通栏 --- */
+        .top-info-bar {
+            background: #2e7d32;
+            color: #fff;
+            font-size: 12px;
+            padding: 8px 5%;
+            text-align: center;
+            border-radius: 0 0 8px 8px;
+        }
+
+        /* --- 页眉布局 --- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 5%;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .logo { font-size: 24px; font-weight: bold; color: #2e7d32; text-decoration: none; }
+        
+        /* --- 搜索与定位组合 --- */
+        .search-location {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-grow: 1;
+            max-width: 400px;
+            margin: 0 20px;
+        }
+        .location-tag {
+            font-size: 13px;
+            color: #2e7d32;
+            background: #e8f5e9;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            flex-grow: 1;
+        }
+        .search-bar input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .search-bar button {
+            padding: 8px 15px;
+            background: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        nav { 
+            display: flex; 
+            align-items: center; 
+            gap: 20px;
+        }
+        nav a {
+            text-decoration: none;
+            color: #555;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+        nav a:hover, nav a.active { 
+            color: #2e7d32; 
+        }
+        /* 购物车数量徽章 */
+        .cart-badge { 
+            position: absolute; 
+            top: -8px; 
+            right: -12px; 
+            background-color: #e53935; 
+            color: white; 
+            font-size: 12px; 
+            font-weight: bold; 
+            width: 18px; 
+            height: 18px; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
+
+        /* --- 轮播图样式 --- */
+        .banner-container { 
+            position: relative; 
+            width: 100%; 
+            height: 400px; 
+            overflow: hidden; 
+            background-color: #eee; 
+            margin: 20px 0; 
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .banner-wrapper { width: 100%; height: 100%; overflow: hidden; }
+        .banner { 
+            display: flex; 
+            width: 300%; 
+            height: 100%; 
+            transition: transform 0.5s ease-in-out; 
+        }
+        .banner img { 
+            width: 33.333%; 
+            height: 100%; 
+            object-fit: cover; 
+            flex-shrink: 0; 
+        }
+        /* 左右按钮样式 */
+        .carousel-btn { 
+            position: absolute; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            background-color: rgba(0, 0, 0, 0.5); 
+            color: white; 
+            border: none; 
+            padding: 15px; 
+            font-size: 20px; 
+            cursor: pointer; 
+            border-radius: 50%; 
+            width: 50px; 
+            height: 50px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            transition: background 0.3s; 
+            z-index: 10; 
+        }
+        .carousel-btn:hover { background-color: rgba(0, 0, 0, 0.8); }
+        .prev { left: 10px; }
+        .next { right: 10px; }
+
+        /* --- 分类导航 --- */
+        .categories { 
+            display: flex; 
+            justify-content: center; 
+            gap: 15px; 
+            padding: 20px 0; 
+            background: #fff; 
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .categories button { 
+            padding: 8px 20px; 
+            border: 1px solid #ddd; 
+            background: #fff; 
+            border-radius: 20px; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+        }
+        .categories button.active, .categories button:hover { 
+            background: #2e7d32; 
+            color: white; 
+            border-color: #2e7d32; 
+        }
+
+        /* --- 商品网格 --- */
+        .product-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); 
+            gap: 20px; 
+            padding: 0 5% 40px; 
+        }
+        /* 商品卡片样式 */
+        .product-card { 
+            background: white; 
+            padding: 15px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); 
+            text-align: center; 
+            transition: transform 0.2s; 
+        }
+        .product-card:hover { transform: translateY(-5px); }
+        .product-card img { 
+            width: 100%; 
+            height: 150px; 
+            object-fit: cover; 
+            border-radius: 4px; 
+        }
+        .product-card h3 { margin: 10px 0; font-size: 16px; }
+        .product-card p { color: #e53935; font-weight: bold; margin-bottom: 10px; }
+
+        /* --- 按钮样式调整 --- */
+        .action-btn {
+            display: block;
+            margin: 10px auto;
+            padding: 8px 15px;
+            background: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            width: 90%;
+        }
+        .action-btn:hover { background: #1b5e20; }
+
+        /* --- 页脚 --- */
+        .footer { 
+            text-align: center; 
+            padding: 20px; 
+            background: #333; 
+            color: #aaa; 
+            font-size: 14px;
+            margin-top: 40px;
+            border-radius: 8px;
+        }
+
+        /* --- 动画效果 --- */
+        @keyframes newItemHighlight { 0% { background-color: #d4edda; } 100% { background-color: transparent; } }
+        .new-item { animation: newItemHighlight 2s ease-in-out; }
+        @keyframes successToast { 0% { opacity: 0; transform: translateY(20px); } 15% { opacity: 1; transform: translateY(0); } 85% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-20px); } }
+        .success-toast { 
+            position: fixed; 
+            bottom: 30px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            background-color: #2e7d32; 
+            color: white; 
+            padding: 12px 24px; 
+            border-radius: 4px; 
+            z-index: 1000; 
+            animation: successToast 2s ease-in-out forwards; 
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 顶部信息通栏 -->
+    <div class="top-info-bar">
+         2026年6月7日 星期日 | 欢迎来到 EcoMall 绿色生活电商平台 | 配送至：广东省佛山市
+    </div>
+
+    <!-- 页眉 -->
+    <header class="header">
+        <a href="index.html" class="logo">EcoMall</a>
+        
+        <!-- 搜索与定位组合 -->
+        <div class="search-location">
+            <div class="location-tag">📍 广东省佛山市</div>
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="搜索有机食品...">
+                <button onclick="searchProducts()">搜索</button>
+            </div>
+        </div>
+
+        <nav>
+            <a href="index.html" class="active">首页</a>
+            <a href="cart.html" id="cart-link">购物车<span class="cart-badge" id="cart-badge">0</span></a>
+            <a href="profile.html">个人中心</a>
+            <a href="admin.html">管理后台</a>
+        </nav>
+    </header>
+
+    <!-- 轮播图 -->
+    <div class="banner-container">
+        <button class="carousel-btn prev" onclick="moveSlide(-1)">&#10094;</button>
+        <div class="banner-wrapper">
+            <div class="banner">
+                <img src="1.png" alt="有机水果" onerror="this.src='https://via.placeholder.com/800x400?text=Banner+1'">
+                <img src="2.png" alt="新鲜蔬菜" onerror="this.src='https://via.placeholder.com/800x400?text=Banner+2'">
+                <img src="3.png" alt="环保生活" onerror="this.src='https://via.placeholder.com/800x400?text=Banner+3'">
+            </div>
+        </div>
+        <button class="carousel-btn next" onclick="moveSlide(1)">&#10095;</button>
+    </div>
+
+    <!-- 分类导航 -->
+    <div class="categories">
+        <button data-category="all" class="active">全部</button>
+        <button data-category="fruits">水果</button>
+        <button data-category="vegetables">蔬菜</button>
+        <button data-category="grains">五谷杂粮</button>
+    </div>
+
+    <!-- 商品列表 -->
+    <div class="product-grid" id="productList">
+        <!-- 商品卡片将通过 JavaScript 动态插入 -->
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        &copy; 24215220219-侯睿
+    </footer>
+
+    <script>
+        // ==================== 核心配置 ====================
+        const CART_KEY = 'ecommall_cart';
+        const PRODUCTS_KEY = 'products';
+        const BROADCAST_CHANNEL = 'ecommall_channel';
+        
+        // 创建 BroadcastChannel 实现跨页面实时通信
+        const channel = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(BROADCAST_CHANNEL) : null;
+
+        // ==================== 数据初始化 ====================
+        let products = JSON.parse(localStorage.getItem(PRODUCTS_KEY)) || [
+            { id: 1, name: "有机苹果", category: "fruits", price: 12.00, image: "apple.png" },
+            { id: 2, name: "新鲜菠菜", category: "vegetables", price: 5.00, image: "vegetable.png" },
+            { id: 3, name: "五常大米", category: "grains", price: 68.00, image: "rice.png" }
+        ];
+
+        // ==================== 轮播图逻辑 ====================
+        let currentIndex = 0;
+        const totalSlides = 3;
+        
+        function updateSlide() {
+            const banner = document.querySelector('.banner');
+            banner.style.transform = `translateX(-${currentIndex * 33.333}%)`;
+        }
+        
+        function moveSlide(direction) {
+            currentIndex = (currentIndex + direction + totalSlides) % totalSlides;
+            updateSlide();
+        }
+        
+        // 自动播放
+        setInterval(() => {
+            moveSlide(1);
+        }, 5000);
+
+        // ==================== 商品渲染 (已修复) ====================
+        function renderProducts(category = 'all') {
+            const container = document.getElementById('productList');
+            container.innerHTML = '';
+            
+            const filtered = category === 'all' ? products : products.filter(p => p.category === category);
+            
+            filtered.forEach(p => {
+                const imagePath = p.image ? p.image : 'https://via.placeholder.com/150?text=No+Image';
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <img src="${imagePath}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/150?text=Image+Error'">
+                    <h3>${p.name}</h3>
+                    <p>¥${parseFloat(p.price).toFixed(2)}</p>
+                    <!-- 修改点：将按钮改为链接，指向详情页 -->
+                    <a href="product.html?id=${p.id}" class="action-btn">查看详情</a>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // ==================== 分类筛选 ====================
+        document.querySelectorAll('.categories button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.categories button').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                renderProducts(this.getAttribute('data-category'));
+            });
+        });
+
+        // ==================== 搜索功能 ====================
+        function searchProducts() {
+            const query = document.getElementById('search-input').value.trim();
+            if(query) {
+                // 跳转到独立的搜索页面，并携带关键词参数
+                window.location.href = `search.html?q=${encodeURIComponent(query)}`;
+            }
+        }
+        
+        // 支持回车搜索
+        document.getElementById('search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') searchProducts();
+        });
+
+        // ==================== 购物车功能 ====================
+        function addToCart(productId) {
+            const cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+            const product = products.find(p => p.id === productId);
+            
+            if (product) {
+                const existingItem = cart.find(item => item.id === productId);
+                if (existingItem) {
+                    existingItem.qty += 1;
+                } else {
+                    cart.push({ 
+                        id: product.id, 
+                        name: product.name, 
+                        price: product.price, 
+                        qty: 1, 
+                        image: product.image, 
+                        checked: true 
+                    });
+                }
+                localStorage.setItem(CART_KEY, JSON.stringify(cart));
+                
+                // 广播购物车更新消息
+                broadcastCartUpdate();
+                updateCartBadge();
+                showSuccessToast(`成功将 ${product.name} 加入购物车！`);
+            }
+        }
+
+        // ==================== 跨页面通信 ====================
+        function broadcastCartUpdate() {
+            if (channel) {
+                channel.postMessage({ type: 'cart_updated', timestamp: Date.now() });
+            }
+            window.dispatchEvent(new CustomEvent('ecommall_cart_change'));
+        }
+
+        // ==================== 购物车徽章更新 ====================
+        function updateCartBadge() {
+            const cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+            const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+            const badge = document.getElementById('cart-badge');
+            if (totalItems > 0) {
+                badge.textContent = totalItems > 99 ? '99+' : totalItems;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        // ==================== 成功提示 ====================
+        function showSuccessToast(message) {
+            const existingToast = document.querySelector('.success-toast');
+            if (existingToast) existingToast.remove();
+            const toast = document.createElement('div');
+            toast.className = 'success-toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
+
+        // ==================== 数据同步监听 ====================
+        if (channel) {
+            channel.onmessage = function(event) {
+                if (event.data && event.data.type === 'cart_updated') {
+                    updateCartBadge();
+                }
+                if (event.data && event.data.type === 'products_updated') {
+                    products = JSON.parse(localStorage.getItem(PRODUCTS_KEY)) || [];
+                    const activeCategory = document.querySelector('.categories button.active').getAttribute('data-category');
+                    renderProducts(activeCategory);
+                }
+            };
+        }
+
+        window.addEventListener('storage', function(e) {
+            if (e.key === PRODUCTS_KEY) {
+                products = JSON.parse(e.newValue) || [];
+                const activeCategory = document.querySelector('.categories button.active').getAttribute('data-category');
+                renderProducts(activeCategory);
+                document.getElementById('productList').querySelectorAll('.product-card').forEach(card => {
+                    card.classList.add('new-item');
+                });
+            } else if (e.key === CART_KEY) {
+                updateCartBadge();
+            }
+        });
+
+        document.addEventListener("visibilitychange", function() {
+            if (document.visibilityState === 'visible') {
+                updateCartBadge();
+                const freshProducts = JSON.parse(localStorage.getItem(PRODUCTS_KEY));
+                if (freshProducts) {
+                    products = freshProducts;
+                    const activeCategory = document.querySelector('.categories button.active').getAttribute('data-category');
+                    renderProducts(activeCategory);
+                }
+            }
+        });
+
+        // ==================== 页面初始化 ====================
+        window.onload = function() {
+            renderProducts();
+            updateCartBadge();
+        };
+    </script>
+</body>
+</html>
